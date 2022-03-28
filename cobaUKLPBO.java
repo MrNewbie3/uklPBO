@@ -3,13 +3,17 @@ import java.util.Scanner;
 
 public class cobaUKLPBO {
     public static void main(String[] args) {
-    Laporan toko = new Laporan();
-    member baru = new member();
-    barang item = new barang();
-    toko.laporan(baru);
-    toko.laporan(item);
-    baru.setNama("Aldo");
-        System.out.println(baru.getNama(3));
+        Laporan toko = new Laporan();
+        member baru = new member();
+        barang item = new barang();
+        toko.laporan(baru);
+        toko.laporan(item);
+        baru.setNama("Aldo");
+        transaksi tokoAhmad = new transaksi();
+        tokoAhmad.prosesTransaksi(baru, tokoAhmad,item);
+        toko.laporan(tokoAhmad, item);
+        toko.laporan(item);
+        toko.laporan(baru);
     }
 }
 
@@ -212,44 +216,48 @@ class transaksi {
     }
 
     public void prosesTransaksi(member member, transaksi transaksi, barang barang) {
-        Scanner input = new Scanner(System.in);
+        Scanner myObj = new Scanner(System.in);
         System.out.println("Silahkan Belanja");
         System.out.print("Masukkan Id member: ");
-        int idMember = input.nextInt();
+        int idMember = myObj.nextInt();
         System.out.println("Selamat datang " + member.getNama(idMember));
         ArrayList<Integer> idbarang = new ArrayList<Integer>();
-        ArrayList<Integer> sum = new ArrayList<Integer>();
+        ArrayList<Integer> banyak = new ArrayList<Integer>();
         int i = 0;
-        int temp = 0;
-        do {
-            System.out.print("Masukkan kode Barang: ");
-            temp = input.nextInt();
-            if (temp!=99){
-                idbarang.add(temp);
-                System.out.println(barang.getNamaBarang(idbarang.get(i))+ " sebanyak: ");
-                banyak.add(input.nextInt());
-                i++;
+        int temp;
+        try {
+            do {
+                System.out.print("Masukkan kode Barang: ");
+                temp = myObj.nextInt();
+                if (temp != 99) {
+                    idbarang.add(temp);
+                    System.out.println(barang.getNamaBarang(idbarang.get(i)) + " sebanyak: ");
+                    banyak.add(myObj.nextInt());
+                    i++;
+                }
+            } while (temp != 99);
+            System.out.println("Transaksi belanja " + member.getNama(idMember) + " sebagai berikut: ");
+            System.out.println("Nama barang \tQty \tHarga \tJumlah \t");
+            int total = 0;
+            int x = idbarang.size();
+            for (int j = 0; j < x; j++) {
+                int jumlah = banyak.get(j) * barang.getHarga(idbarang.get(j));
+                total += jumlah;
+                System.out.println(barang.getNamaBarang(idbarang.get(j)) + "\t" + idbarang.get(j) + "\t" + barang.getHarga(idbarang.get(j)) + "\t" + jumlah);
+                transaksi.setTransaksi(barang, idMember, idbarang.get(j), banyak.get(j));
             }
-        }while(temp !=99);
-        System.out.println("Transaksi belanja "+member.getNama(idMember)+ " sebagai berikut: ");
-        System.out.println("Nama barang \tQty \tHarga \tJumlah \t");
-        int total =0;
-        int x = idbarang.size();
-        for (int j = 0; j < x; j++) {
-            int jumlah = sum.get(j) * barang.getHarga(idbarang.get(j));
-            total += jumlah;
-            System.out.println(barang.getNamaBarang(idbarang.get(j))+ "\t" + idbarang.get(j)+"\t"+barang.getHarga(idbarang.get(j))+"\t"+jumlah);
-            transaksi.setTransaksi(barang, idMember, idbarang.get(j),sum.get(j));
+            System.out.println("total belanja: " + total);
+            member.editSaldo(idMember, member.getSaldo(idMember) - total);
+        }catch (Exception e){
+            System.out.println(e);
         }
-        System.out.println("total belanja: "+total);
-        member.editSaldo(idMember, member.getSaldo(idMember)-total);
     }
 
-    private void setTransaksi(barang barang, int idbarang, int idMember, Integer sum) {
+    private void setTransaksi(barang barang, int idbarang, int idMember, int banyaknya) {
         this.idMember.add(idMember);
         this.idBarang.add(idbarang);
-        this.banyak.add(sum);
-        barang.editStok(idbarang, barang.getStok(idbarang) - sum);
+        this.banyak.add(banyaknya);
+        barang.editStok( barang.getStok(idbarang) - banyaknya, idbarang);
     }
 
     public int getIdBarang(int id) {
